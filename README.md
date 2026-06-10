@@ -1,0 +1,1 @@
+# New-KQL-Detections
