@@ -1,0 +1,16 @@
+// Title: Access to Temporary Cloudflare Tunnel Domain
+// Description: Monitors for systems communicating with trycloudflare.com infrastructure, which may indicate creation or use of temporary Cloudflare tunnels capable of bypassing traditional remote access controls.
+// MITRE ATT&CK: T1572, T1090.003
+// Tactics: Command and Control
+// Platform: Microsoft Defender for Endpoint
+
+DeviceNetworkEvents
+| where Timestamp > ago(14d)
+| extend Destination = tostring(RemoteUrl)
+| where Destination endswith "trycloudflare.com"
+| summarize
+    Connections=count(),
+    Earliest=min(Timestamp),
+    Latest=max(Timestamp)
+by DeviceName, Destination
+| sort by Connections desc

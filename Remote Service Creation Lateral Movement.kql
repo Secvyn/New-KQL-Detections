@@ -1,0 +1,13 @@
+// Title: Remote Service Creation (Lateral Movement)
+// Description: Detects inbound RPC calls to the Service Control Manager interface with operation numbers corresponding to service creation and modification, which may indicate lateral movement via remote service installation.
+// MITRE ATT&CK: T1021.002, T1543.003
+// Tactics: Lateral Movement, Persistence
+// Platform: Microsoft Defender for Endpoint
+
+DeviceEvents
+| where ActionType == "InboundRemoteRpcCall"
+| extend parsed = parse_json(AdditionalFields)
+| extend Uuid = tostring(parsed.RpcInterfaceUuid), Opnum = toint(parsed.RpcOpNum)
+| where Uuid == "367abb81-9844-35f1-ad32-98f038001003"
+| where Opnum in (12, 24, 44, 45, 60)
+| summarize TotalEvents = count(), Devices = dcount(DeviceId) by AccountName

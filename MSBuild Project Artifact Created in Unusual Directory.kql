@@ -1,0 +1,18 @@
+// Title: MSBuild Project Artifact Created in Unusual Directory
+// Description: Detects MSBuild project files created beneath ProgramData, an uncommon location that has been abused by threat actors to stage malicious project files for code execution.
+// MITRE ATT&CK: T1127.001, T1105
+// Tactics: Defense Evasion, Command and Control
+// Platform: Microsoft Defender for Endpoint
+
+DeviceFileEvents
+| where ActionType =~ "FileCreated"
+| where Timestamp > ago(14d)
+| where FileName has ".proj"
+| where FolderPath startswith @"C:\ProgramData"
+| extend Creator = InitiatingProcessFileName
+| project Timestamp,
+          DeviceName,
+          FileName,
+          FolderPath,
+          Creator,
+          InitiatingProcessCommandLine

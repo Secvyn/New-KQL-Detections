@@ -1,0 +1,13 @@
+// Title: PowerShell Hardware Fingerprinting
+// Description: Detects PowerShell queries for motherboard serial numbers or UUIDs, behaviors commonly associated with malware reconnaissance and sandbox evasion.
+// MITRE ATT&CK: T1082, T1497.001
+// Tactics: Discovery, Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName =~ "powershell.exe"
+| where ProcessCommandLine has_any (
+    "Win32_BaseBoard",
+    "Win32_ComputerSystemProduct"
+)
+| where ProcessCommandLine contains_any ("SerialNumber","UUID")

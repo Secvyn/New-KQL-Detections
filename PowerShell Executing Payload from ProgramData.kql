@@ -1,0 +1,10 @@
+// Title: PowerShell Executing Payload from ProgramData
+// Description: Identifies PowerShell executing scripts or expressions from the ProgramData directory, which may indicate malicious staging or backdoor execution.
+// MITRE ATT&CK: T1059.001, T1105
+// Tactics: Execution, Command and Control
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName =~ "powershell.exe"
+| where ProcessCommandLine has @"C:\ProgramData\"
+| where ProcessCommandLine has_any ("IEX","Invoke-Expression",".ps1")

@@ -1,0 +1,10 @@
+// Title: Forfiles Utility Used for Arbitrary Command Execution
+// Description: Detects use of forfiles.exe with the /c execution parameter, a technique that can be abused to launch commands while bypassing application controls.
+// MITRE ATT&CK: T1218, T1202
+// Tactics: Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName =~ "forfiles.exe"
+      or ProcessCommandLine startswith "forfiles"
+| where ProcessCommandLine contains "/c"

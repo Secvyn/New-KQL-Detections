@@ -1,0 +1,12 @@
+// Title: PowerShell In-Memory Loader Using Byte Reversal
+// Description: Detects PowerShell commands that reverse byte arrays before dynamically loading assemblies into memory, a behavior commonly associated with advanced malware loaders and fileless execution techniques.
+// MITRE ATT&CK: T1059.001, T1620, T1027
+// Tactics: Execution, Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName in~ ("powershell.exe", "pwsh.exe")
+| where ProcessCommandLine has "IO.File"
+| where ProcessCommandLine has "System.Reflection.Assembly"
+| where ProcessCommandLine has "Length-1"
+| where ProcessCommandLine has "..0"

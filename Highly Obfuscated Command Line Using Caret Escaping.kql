@@ -1,0 +1,11 @@
+// Title: Highly Obfuscated Command Line Using Caret Escaping
+// Description: Detects excessive caret (^) escaping in command lines, a common obfuscation technique used by attackers to evade detection and conceal malicious commands.
+// MITRE ATT&CK: T1027, T1059.003
+// Tactics: Defense Evasion, Execution
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName in~ ("cmd.exe", "powershell.exe", "pwsh.exe")
+| extend CaretCount = countof(ProcessCommandLine, "^")
+| where CaretCount > 5
+| where ProcessCommandLine matches regex @"([A-Za-z0-9]\^){3,}"

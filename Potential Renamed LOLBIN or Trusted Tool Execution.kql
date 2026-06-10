@@ -1,0 +1,26 @@
+// Title: Potential Renamed LOLBIN or Trusted Tool Execution
+// Description: Detects executables whose Original File Name metadata differs from the actual filename on disk, which may indicate renamed Living-off-the-Land Binaries (LOLBINs) or attacker tools attempting to evade security controls.
+// MITRE ATT&CK: T1036.003, T1218
+// Tactics: Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+let KnownOriginalNames = dynamic([
+    "psexec.exe",
+    "rundll32",
+    "rclone.exe",
+    "mimikatz.exe",
+    "powershell.exe",
+    "cmd.exe",
+    "msbuild.exe",
+    "regsvr32.exe",
+    "certutil.exe",
+    "vncviewer.exe",
+    "wscript.exe",
+    "7zip.exe",
+    "adexplorer.exe",
+    "procdump.exe"
+]);
+
+DeviceImageLoadEvents
+| where InitiatingProcessVersionInfoOriginalFileName has_any (KnownOriginalNames)
+| where tolower(InitiatingProcessVersionInfoOriginalFileName) != tolower(InitiatingProcessFileName)

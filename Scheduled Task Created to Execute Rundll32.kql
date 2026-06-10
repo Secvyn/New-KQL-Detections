@@ -1,0 +1,18 @@
+// Title: Scheduled Task Created to Execute Rundll32
+// Description: Detects scheduled task creation commands that invoke rundll32.exe, a commonly abused binary for persistence and malicious DLL execution.
+// MITRE ATT&CK: T1053.005, T1218.011
+// Tactics: Persistence, Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName =~ "schtasks.exe"
+| where ProcessCommandLine contains "rundll32"
+| where ProcessCommandLine has_any ("/create","-create")
+| project Timestamp,
+          DeviceName,
+          AccountName,
+          FolderPath,
+          SHA256,
+          ProcessCommandLine,
+          InitiatingProcessFileName,
+          InitiatingProcessCommandLine

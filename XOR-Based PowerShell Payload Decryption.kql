@@ -1,0 +1,11 @@
+// Title: XOR-Based PowerShell Payload Decryption
+// Description: Detects PowerShell commands using XOR operations together with execution primitives that may indicate obfuscated in-memory payload decoding.
+// MITRE ATT&CK: T1059.001, T1027
+// Tactics: Execution, Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName =~ "powershell.exe"
+| where ProcessCommandLine has "-bxor"
+| where ProcessCommandLine has "81"
+| where ProcessCommandLine has_any ("IEX","Invoke-Expression")

@@ -1,0 +1,23 @@
+// Title: Suspicious Cloudflare Tunnel Exposure Activity
+// Description: Identifies processes consistent with Cloudflare Quick Tunnel usage by detecting unauthenticated cloudflared executions that publish local services through the --url option. Such behavior may enable unauthorized external access to internal resources.
+// MITRE ATT&CK: T1572, T1090
+// Tactics: Command and Control
+// Platform: Microsoft Defender for Endpoint
+
+let SuspiciousArgs = dynamic(["tunnel run", "login"]);
+
+DeviceProcessEvents
+| extend Cmd = tostring(ProcessCommandLine)
+| where Timestamp > ago(14d)
+| where Cmd contains "--url"
+| where not(Cmd has_any (SuspiciousArgs))
+| where ProcessVersionInfoOriginalFileName =~ "cloudflared.exe"
+    or FileName matches regex @"^cloudflared.*\.exe$"
+| extend PublishedService = extract(@"--url\s+([^\s]+)", 1, Cmd)
+| summarize FirstSeen=min(Timestamp),
+            LastSeen=max(Timestamp)
+            by DeviceName,
+               AccountName,
+               FileName,
+               PublishedService,
+               Cmd

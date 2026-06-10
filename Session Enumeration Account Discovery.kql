@@ -1,0 +1,13 @@
+// Title: Session Enumeration (Account Discovery)
+// Description: Detects inbound RPC calls to the Server Service interface using operation number 12 (NetrSessionEnum), which may indicate remote session enumeration for account discovery and reconnaissance.
+// MITRE ATT&CK: T1087, T1049
+// Tactics: Discovery
+// Platform: Microsoft Defender for Endpoint
+
+DeviceEvents
+| where ActionType == "InboundRemoteRpcCall"
+| extend af = parse_json(AdditionalFields)
+| extend Uuid = tostring(af.RpcInterfaceUuid), Opnum = toint(af.RpcOpNum)
+| where Uuid == "4b324fc8-1670-01d3-1278-5a47bf6ee188"
+| where Opnum == 12
+| summarize DevicesSeen = dcount(DeviceId), Accounts = dcount(AccountSid) by AccountDomain

@@ -1,0 +1,13 @@
+// Title: Public Network MSHTA Activity from User Context
+// Description: Identifies mshta.exe accessing externally hosted HTA content from a user-initiated Explorer session, potentially indicating malicious remote code execution.
+// MITRE ATT&CK: T1218.005, T1071.001
+// Tactics: Defense Evasion, Command and Control
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName =~ "mshta.exe"
+| where RemoteIPType =~ "Public"
+| where InitiatingProcessParentFileName =~ "explorer.exe"
+| where InitiatingProcessCommandLine has ".hta"
+| where InitiatingProcessCommandLine contains "http"
+| where InitiatingProcessCommandLine !has_any ("CCM", "Microsoft Endpoint")

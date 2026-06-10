@@ -1,0 +1,45 @@
+// Title: Unusual Child Process Spawned by .NET Build Utility
+// Description: Detects trusted .NET tooling launching shells, scripting engines, or administrative utilities that are not typically associated with legitimate compilation workflows, potentially indicating malicious execution or post-exploitation.
+// MITRE ATT&CK: T1127, T1059, T1218
+// Tactics: Defense Evasion, Execution
+// Platform: Microsoft Defender for Endpoint
+
+let ParentProcesses = dynamic([
+    "installutil.exe",
+    "regasm.exe",
+    "regsvcs.exe",
+    "msbuild.exe",
+    "csc.exe",
+    "vbc.exe",
+    "jsc.exe",
+    "ilasm.exe"
+]);
+
+let RiskyChildren = dynamic([
+    "cmd.exe",
+    "powershell.exe",
+    "pwsh.exe",
+    "wmic.exe",
+    "certutil.exe",
+    "bitsadmin.exe",
+    "mshta.exe",
+    "regsvr32.exe",
+    "rundll32.exe",
+    "wscript.exe",
+    "cscript.exe",
+    "net.exe",
+    "whoami.exe"
+]);
+
+DeviceProcessEvents
+| where Timestamp > ago(14d)
+| where InitiatingProcessFileName in~ (ParentProcesses)
+| where FileName in~ (RiskyChildren)
+| where not(InitiatingProcessFileName =~ "msbuild.exe"
+            and FileName in~ ("csc.exe","vbc.exe","cl.exe","link.exe"))
+| summarize TriggerCount=count()
+by DeviceName,
+   InitiatingProcessFileName,
+   FileName,
+   ProcessCommandLine,
+   InitiatingProcessCommandLine

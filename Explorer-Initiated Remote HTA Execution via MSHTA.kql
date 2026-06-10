@@ -1,0 +1,12 @@
+// Title: Explorer-Initiated Remote HTA Execution via MSHTA
+// Description: Detects mshta.exe launched from Windows Explorer to retrieve remote HTA content over HTTP, a technique frequently observed in phishing campaigns and initial access attacks.
+// MITRE ATT&CK: T1218.005, T1566.002
+// Tactics: Defense Evasion, Initial Access
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName =~ "mshta.exe"
+| where InitiatingProcessFileName =~ "explorer.exe"
+| where ProcessCommandLine has ".hta"
+| where ProcessCommandLine has "http"
+| where ProcessCommandLine !has_any ("CCM", "Microsoft Endpoint")

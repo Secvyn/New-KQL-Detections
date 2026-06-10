@@ -1,0 +1,14 @@
+// Title: Obfuscated Scheduled Task Leveraging PowerShell XOR Loader
+// Description: Detects scheduled tasks created with embedded PowerShell XOR decoding logic, ReadAllBytes, and Invoke-Expression techniques that may be used to establish persistence and execute obfuscated payloads.
+// MITRE ATT&CK: T1053.005, T1059.001, T1027
+// Tactics: Persistence, Execution, Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName =~ "schtasks.exe"
+| where ProcessCommandLine has "/create"
+| where ProcessCommandLine has_all ("OneDrive", "Startup", "Task")
+| where ProcessCommandLine has "-bxor"
+| where ProcessCommandLine has "ReadAllBytes"
+| where ProcessCommandLine has "iex"
+| where ProcessCommandLine contains "[Text.Encoding]::UTF8.GetBytes"

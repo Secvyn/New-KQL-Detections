@@ -1,0 +1,18 @@
+// Title: PowerShell Loading .NET Assembly from Image File
+// Description: Detects PowerShell reading image files and loading their contents directly into memory as .NET assemblies, a stealth technique used to hide malicious payloads inside benign-looking files.
+// MITRE ATT&CK: T1059.001, T1027.002, T1620
+// Tactics: Execution, Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName in~ ("powershell.exe", "pwsh.exe")
+| where ProcessCommandLine has "System.Reflection.Assembly"
+| where ProcessCommandLine has "Load"
+| where ProcessCommandLine has "ReadAllBytes"
+| where ProcessCommandLine has_any (
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".bmp",
+    ".gif"
+)

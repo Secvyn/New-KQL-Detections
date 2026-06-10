@@ -1,0 +1,9 @@
+// Title: OneDriveUpdater Executed from Non-Standard Location
+// Description: Detects execution of OneDriveUpdater.exe from C:\ProgramData, which may represent a masqueraded binary attempting to impersonate legitimate Microsoft software.
+// MITRE ATT&CK: T1036.005, T1574
+// Tactics: Defense Evasion, Persistence
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName =~ "OneDriveUpdater.exe"
+| where FolderPath startswith @"C:\ProgramData"

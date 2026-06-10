@@ -1,0 +1,14 @@
+// Title: Connection to Known Malicious Infrastructure (sfrclak IOC)
+// Description: Detects outbound network activity to the known malicious domain sfrclak.com or IP address 142.11.206.73. This behavior may indicate malware beaconing, command-and-control communication, or interaction with attacker-controlled infrastructure.
+// MITRE ATT&CK: T1071.001, T1041
+// Tactics: Command and Control, Exfiltration
+// Platform: Microsoft Defender for Endpoint
+
+let IOC_Domains = dynamic(["sfrclak.com"]);
+let IOC_IPs = dynamic(["142.11.206.73"]);
+DeviceNetworkEvents
+| where Timestamp >= ago(7d)
+| extend MatchDomain = RemoteUrl has_any (IOC_Domains),
+         MatchIP = RemoteIP in (IOC_IPs)
+| where MatchDomain or MatchIP
+| summarize Connections = count() by bin(Timestamp, 1h), DeviceName

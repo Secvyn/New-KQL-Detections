@@ -1,0 +1,14 @@
+// Title: Advanced Forfiles Execution Pattern
+// Description: Identifies forfiles.exe launched with multiple execution switches (/c, /p, /m or equivalent), which may indicate automated scripting or malicious Living-off-the-Land activity.
+// MITRE ATT&CK: T1218, T1202
+// Tactics: Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName =~ "forfiles.exe"
+      or ProcessCommandLine has "forfiles"
+| where (
+        ProcessCommandLine has_all ("/c", "/p", "/m")
+        or
+        ProcessCommandLine has_all ("-c", "-p", "-m")
+      )

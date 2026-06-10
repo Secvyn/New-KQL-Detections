@@ -1,0 +1,23 @@
+// Title: Cloudflared Executable Masquerading Detected
+// Description: Flags executables whose embedded metadata identifies them as Cloudflared while the filename differs from expected distribution names, suggesting potential evasion through binary renaming.
+// MITRE ATT&CK: T1036.003, T1572
+// Tactics: Defense Evasion, Command and Control
+// Platform: Microsoft Defender for Endpoint
+
+let ApprovedNames = dynamic([
+    "cloudflared.exe",
+    "cloudflared-windows-amd64.exe",
+    "cloudflared-linux-amd64"
+]);
+
+DeviceProcessEvents
+| where Timestamp > ago(14d)
+| where ProcessVersionInfoOriginalFileName =~ "cloudflared.exe"
+| extend IsExpected = FileName in~ (ApprovedNames)
+| where IsExpected == false
+| project DeviceName,
+          Timestamp,
+          FileName,
+          FolderPath,
+          ProcessVersionInfoOriginalFileName,
+          ProcessCommandLine

@@ -1,0 +1,10 @@
+// Title: Suspicious ScreenConnect Service Launch
+// Description: Identifies ScreenConnect client service execution initiated by trusted system processes while referencing suspicious top-level domains, which may indicate unauthorized remote access deployment.
+// MITRE ATT&CK: T1219, T1036
+// Tactics: Command and Control, Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FileName =~ "ScreenConnect.ClientService.exe"
+| where InitiatingProcessFileName in~ ("dfsvc.exe", "services.exe")
+| where ProcessCommandLine has_any (".top",".info",".site",".tk",".xyz",".pw",".ml",".club",".cf","ws")

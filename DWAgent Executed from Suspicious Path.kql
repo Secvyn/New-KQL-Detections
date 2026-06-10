@@ -1,0 +1,12 @@
+// Title: DWAgent Executed from Suspicious Path
+// Description: Detects execution of DWAgent from download or temporary directories rather than standard installation locations, potentially indicating unauthorized remote management activity.
+// MITRE ATT&CK: T1219, T1036.005
+// Tactics: Command and Control, Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where FolderPath =~ @"C:\Users\Downloads\dwagent.exe"
+    or (
+        FolderPath has @"C:\Users\AppData\Local\Temp\dwagent"
+        and FolderPath endswith @"runtime\dwagent.exe"
+    )

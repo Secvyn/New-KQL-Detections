@@ -1,0 +1,14 @@
+// Title: LSA Restricted Admin Registry Modification
+// Description: Detects registry changes affecting DisableRestrictedAdmin, which could weaken authentication protections or facilitate credential theft techniques.
+// MITRE ATT&CK: T1112, T1550.002
+// Tactics: Defense Evasion, Lateral Movement
+// Platform: Microsoft Defender for Endpoint
+
+DeviceProcessEvents
+| where ProcessCommandLine has @"HKLM\System\CurrentControlSet\Control\Lsa"
+| where ProcessCommandLine has_all (
+    "DisableRestrictedAdmin",
+    "REG_DWORD",
+    "00000000"
+)
+| where ProcessCommandLine contains "ADD"

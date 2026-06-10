@@ -1,0 +1,16 @@
+// Title: Named Pipe Remote Access via JsonVMAccessExtension
+// Description: Detects named pipe activity with remote access enabled, initiated by JsonVMAccessExtension.exe running as SYSTEM. This may indicate abuse of the Azure VM Access Extension for unauthorized remote access.
+// MITRE ATT&CK: T1021, T1078.004
+// Tactics: Lateral Movement, Initial Access
+// Platform: Microsoft Defender for Endpoint
+
+DeviceEvents
+| where TimeGenerated >= ago(90d)
+| extend PipeName = tostring(AdditionalFields.PipeName),
+         RemoteAccess = tostring(AdditionalFields.RemoteClientsAccess),
+         ProcCmd = tostring(InitiatingProcessCommandLine),
+         ProcAccount = tostring(InitiatingProcessAccountName)
+| where RemoteAccess == "AcceptRemote"
+| where ProcCmd has "JsonVMAccessExtension.exe" and ProcCmd has "enable"
+| where ProcAccount =~ "system"
+| project TimeGenerated, DeviceId, DeviceName, ProcCmd, ProcAccount, RemoteAccess, PipeName

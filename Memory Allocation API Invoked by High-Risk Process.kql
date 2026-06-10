@@ -1,0 +1,29 @@
+// Title: Memory Allocation API Invoked by High-Risk Process
+// Description: Detects calls to NtAllocateVirtualMemory originating from scripting engines or binaries executing from temporary user-controlled locations. This behavior is commonly associated with reflective loading, shellcode execution, and in-memory malware.
+// MITRE ATT&CK: T1055, T1620, T1059
+// Tactics: Defense Evasion, Privilege Escalation, Execution
+// Platform: Microsoft Defender for Endpoint
+
+DeviceEvents
+| where ActionType =~ "NtAllocateVirtualMemoryApiCall"
+| where Timestamp > ago(14d)
+| extend TempLocation =
+    InitiatingProcessFolderPath has @"\Temp\"
+    or InitiatingProcessFolderPath has @"\Downloads\"
+| extend ScriptHost =
+    InitiatingProcessFileName in~ (
+        "powershell.exe",
+        "pwsh.exe",
+        "wscript.exe",
+        "cscript.exe",
+        "winhlp32.exe"
+    )
+| where TempLocation or ScriptHost
+| summarize
+    APIInvocations=count(),
+    FirstSeen=min(Timestamp),
+    LastSeen=max(Timestamp)
+by DeviceName,
+   InitiatingProcessFileName,
+   InitiatingProcessFolderPath,
+   InitiatingProcessAccountName

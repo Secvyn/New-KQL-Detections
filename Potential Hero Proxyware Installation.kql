@@ -1,0 +1,22 @@
+// Title: Potential Hero Proxyware Installation
+// Description: Detects Hero proxyware artifacts being written or modified within the Windows SysWOW64 directory. Presence of these files may indicate installation of unauthorized proxy services or abuse of enterprise endpoints for traffic relaying.
+// MITRE ATT&CK: T1090, T1036
+// Tactics: Command and Control, Defense Evasion
+// Platform: Microsoft Defender for Endpoint
+
+let HeroFiles = dynamic([
+    "hero.exe",
+    "hero.dll",
+    "uphero.exe"
+]);
+
+DeviceFileEvents
+| where FileName in~ (HeroFiles)
+| where FolderPath contains @"SysWOW64\hero"
+| summarize
+    LatestActivity=max(Timestamp)
+by DeviceName,
+   FileName,
+   FolderPath,
+   SHA256,
+   InitiatingProcessFileName
